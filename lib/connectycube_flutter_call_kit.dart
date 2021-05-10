@@ -1,51 +1,46 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 typedef Future<dynamic> CallEventHandler(
-    String sessionId,
-    int callType,
-    int callerId,
-    String callerName,
-    Set<int> opponentsIds,
-    );
+  String sessionId,
+  int callType,
+  int callerId,
+  String callerName,
+  Set<int> opponentsIds,
+);
 
 class ConnectycubeFlutterCallKit {
   static const MethodChannel _channel =
-  const MethodChannel('connectycube_flutter_call_kit');
+      const MethodChannel('connectycube_flutter_call_kit');
 
   static ConnectycubeFlutterCallKit get instance => _getInstance();
-  static ConnectycubeFlutterCallKit _instance;
-  static String TAG = "ConnectycubeFlutterCallKit";
+  static ConnectycubeFlutterCallKit _instance =
+      ConnectycubeFlutterCallKit._internal();
+  // static String TAG = "ConnectycubeFlutterCallKit";
 
-  static ConnectycubeFlutterCallKit _getInstance() {
-    if (_instance == null) {
-      _instance = ConnectycubeFlutterCallKit._internal();
-    }
-    return _instance;
-  }
+  static ConnectycubeFlutterCallKit _getInstance() => _instance;
 
   factory ConnectycubeFlutterCallKit() => _getInstance();
 
   ConnectycubeFlutterCallKit._internal();
 
-  static Function(
-      String sessionId,
-      int callType,
-      int callerId,
-      String callerName,
-      Set<int> opponentsIds,
-      ) onCallAcceptedWhenTerminated;
+  static late Function(
+    String sessionId,
+    int callType,
+    int callerId,
+    String callerName,
+    Set<int> opponentsIds,
+  )? onCallAcceptedWhenTerminated;
 
-  static CallEventHandler _onCallAccepted;
-  static CallEventHandler _onCallRejected;
+  static late CallEventHandler _onCallAccepted;
+  static late CallEventHandler _onCallRejected;
 
   /// Sets up [MessageHandler] for incoming messages.
   void init({
-    CallEventHandler onCallAccepted,
-    CallEventHandler onCallRejected,
+    required CallEventHandler onCallAccepted,
+    required CallEventHandler onCallRejected,
   }) {
     _onCallAccepted = onCallAccepted;
     _onCallRejected = onCallRejected;
@@ -57,11 +52,11 @@ class ConnectycubeFlutterCallKit {
   }
 
   static Future<void> showCallNotification({
-    @required String sessionId,
-    @required int callType,
-    @required int callerId,
-    @required String callerName,
-    @required Set<int> opponentsIds,
+    required String sessionId,
+    required int callType,
+    required int callerId,
+    required String callerName,
+    required Set<int> opponentsIds,
   }) async {
     if (!Platform.isAndroid) return;
 
@@ -81,7 +76,7 @@ class ConnectycubeFlutterCallKit {
   }
 
   static Future<void> reportCallAccepted({
-    @required String sessionId,
+    required String sessionId,
   }) async {
     if (!Platform.isAndroid) return;
 
@@ -91,7 +86,7 @@ class ConnectycubeFlutterCallKit {
   }
 
   static Future<void> reportCallEnded({
-    @required String sessionId,
+    required String sessionId,
   }) async {
     if (!Platform.isAndroid) return;
 
@@ -100,8 +95,8 @@ class ConnectycubeFlutterCallKit {
     });
   }
 
-  static Future<String> getCallState({
-    @required String sessionId,
+  static Future<String?> getCallState({
+    required String sessionId,
   }) async {
     if (!Platform.isAndroid) return Future.value(CallState.UNKNOWN);
 
@@ -111,8 +106,8 @@ class ConnectycubeFlutterCallKit {
   }
 
   static Future<void> setCallState({
-    @required String sessionId,
-    @required String callState,
+    required String sessionId,
+    required String callState,
   }) async {
     return _channel.invokeMethod("setCallState", {
       'session_id': sessionId,
@@ -121,7 +116,7 @@ class ConnectycubeFlutterCallKit {
   }
 
   static Future<void> setOnLockScreenVisibility({
-    @required bool isVisible,
+    required bool isVisible,
   }) async {
     if (!Platform.isAndroid) return;
 
@@ -146,7 +141,7 @@ class ConnectycubeFlutterCallKit {
         );
       case "onCallRejected":
         if (onCallAcceptedWhenTerminated != null) {
-          onCallAcceptedWhenTerminated.call(
+          onCallAcceptedWhenTerminated!.call(
             map["session_id"],
             map["call_type"],
             map["caller_id"],
